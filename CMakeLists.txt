@@ -1,4 +1,4 @@
-#/****************************************************************************
+ï»¿#/****************************************************************************
 # Copyright (c) 2013-2014 cocos2d-x.org
 # Copyright (c) 2015-2017 Chukong Technologies Inc.
 #
@@ -54,18 +54,20 @@ if(APPLE OR WINDOWS)
     cocos_mark_multi_resources(common_res_files RES_TO "Resources" FOLDERS ${GAME_RES_FOLDER})
 endif()
 
-add_definitions(-DASIO_STANDALONE) # asio×÷Îª¶ÀÁ¢¿â±àÒë
+add_definitions(-DASIO_STANDALONE) # asioä½œä¸ºç‹¬ç«‹åº“ç¼–è¯‘
 
 # add cross-platforms source files and header files 
-file(GLOB_RECURSE GAME_HEADER Classes/asio/*.hpp) # Ìí¼Óasio¿â
+file(GLOB_RECURSE GAME_HEADER Classes/asio/*.hpp) # æ·»åŠ asioåº“
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/HelloWorldScene.cpp
+	 Classes/Network.cpp
      )
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/HelloWorldScene.h
 	 Classes/asio.hpp
+	 Classes/Network.h
      )
 
 if(ANDROID)
