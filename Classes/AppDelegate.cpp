@@ -24,6 +24,7 @@
 
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
+#include "Network.h"
 
 // #define USE_AUDIO_ENGINE 1
 
@@ -112,6 +113,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // run
     director->runWithScene(scene);
+
+	Network::getNetwork()->startNetwork();
 
     return true;
 }
