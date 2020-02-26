@@ -54,7 +54,10 @@ if(APPLE OR WINDOWS)
     cocos_mark_multi_resources(common_res_files RES_TO "Resources" FOLDERS ${GAME_RES_FOLDER})
 endif()
 
+add_definitions(-DASIO_STANDALONE) # asio作为独立库编译
+
 # add cross-platforms source files and header files 
+file(GLOB_RECURSE GAME_HEADER Classes/asio/*.hpp) # 添加asio库
 list(APPEND GAME_SOURCE
      Classes/AppDelegate.cpp
      Classes/HelloWorldScene.cpp
@@ -62,6 +65,7 @@ list(APPEND GAME_SOURCE
 list(APPEND GAME_HEADER
      Classes/AppDelegate.h
      Classes/HelloWorldScene.h
+	 Classes/asio.hpp
      )
 
 if(ANDROID)
