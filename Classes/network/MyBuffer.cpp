@@ -26,3 +26,7 @@ void MyBuffer::writeInt(int val) {
 void MyBuffer::writeString(const char* dat, int len) {
 	std::copy(dat, dat + len, std::back_inserter(buffer));
 }
+
+void MyBuffer::append(std::vector<char>& dat) {
+	std::copy(dat.begin(), dat.end(), std::back_inserter(buffer));
+}

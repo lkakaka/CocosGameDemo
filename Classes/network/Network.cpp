@@ -9,36 +9,6 @@ Network::Network()
 	read_buf.resize(1024);
 }
 
-void Network::loop()
-{
-	asio::io_context io_context;
-	std::shared_ptr<tcp::socket> s(new tcp::socket(io_context));
-	tcp::endpoint target(asio::ip::make_address("127.0.0.1"), 20000);
-	s->connect(target);
-
-	std::vector<unsigned char> read_buf(1024);
-	auto buf = asio::buffer(read_buf, read_buf.size());
-	s->async_receive(buf, [buf](const asio::error_code error, size_t datLen) {
-		if (error.value())
-		{
-			const std::string err_str = error.message();
-			CCLOG("$close connection, %s", err_str.data());
-			return;
-		}
-		if (datLen > 0)
-		{
-			CCLOG("$receive data, len:%d, %s", datLen, buf.data());
-			/*auto iter = read_buf.begin();
-			std::advance(iter, datLen);
-			std::copy(read_buf.begin(), iter, std::back_inserter(read_buf));*/
-		}
-		});
-	asio::io_context::work worker(io_context);
-	io_context.run();
-	//std::thread t([&io_context]() {io_context.run(); });
-	//t.join();
-}
-
 void Network::run() {
 	asio::io_context::work worker(io_context);
 	io_context.run();
@@ -58,7 +28,7 @@ void Network::connect() {
 
 void Network::doRead() {
 	auto buf = asio::buffer(read_buf, read_buf.size());
-	m_socket->async_receive(buf, [buf](const asio::error_code error, size_t datLen) {
+	m_socket->async_receive(buf, [this, buf](const asio::error_code error, size_t datLen) {
 		if (error.value())
 		{
 			const std::string err_str = error.message();
@@ -68,11 +38,32 @@ void Network::doRead() {
 		if (datLen > 0)
 		{
 			CCLOG("$receive data, len:%d, %s", datLen, buf.data());
-			/*auto iter = read_buf.begin();
-			std::advance(iter, datLen);
-			std::copy(read_buf.begin(), iter, std::back_inserter(read_buf));*/
+			m_recvBuf.append(read_buf);
+			doParse();
 		}
 	});
+}
+
+void Network::doParse() {
+	int size = m_recvBuf.size();
+	if (size < 8) return;
+	int iLen = m_recvBuf.readInt();
+	if (size < iLen) return;
+	m_recvBuf.readIntEx();
+	int iMsgId = m_recvBuf.readIntEx();
+	int iMsgLen = iLen - 8;
+	MessageMgr::onRecvMsg(iMsgId, m_recvBuf.data(), iMsgLen);
+	m_recvBuf.remove(iMsgLen);
+	doParse();
+}
+
+void Network::sendMsg(int msgId, google::protobuf::Message& msg) {
+	MyBuffer buffer;
+	buffer.writeInt(msgId);
+	std::string strMsg = msg.SerializeAsString();
+	buffer.writeString(strMsg.data(), strMsg.size());
+	std::copy(buffer.data(), buffer.data() + buffer.size(), std::back_inserter(m_sendBuf));
+	doSend();
 }
 
 void Network::sendData(std::vector<char> msg) {
