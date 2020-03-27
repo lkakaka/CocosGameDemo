@@ -24,7 +24,7 @@
 
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
-#include "Network.h"
+#include "network/Network.h"
 
 // #define USE_AUDIO_ENGINE 1
 

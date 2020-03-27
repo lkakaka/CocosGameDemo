@@ -54,21 +54,24 @@ if(APPLE OR WINDOWS)
     cocos_mark_multi_resources(common_res_files RES_TO "Resources" FOLDERS ${GAME_RES_FOLDER})
 endif()
 
+set(PROTO_BUFFER_ROOT ../protobuf-3.9.0)
+
 add_definitions(-DASIO_STANDALONE) # asio作为独立库编译
 
 # add cross-platforms source files and header files 
-file(GLOB_RECURSE GAME_HEADER Classes/asio/*.hpp) # 添加asio库
-list(APPEND GAME_SOURCE
-     Classes/AppDelegate.cpp
-     Classes/HelloWorldScene.cpp
-	 Classes/Network.cpp
-     )
-list(APPEND GAME_HEADER
-     Classes/AppDelegate.h
-     Classes/HelloWorldScene.h
-	 Classes/asio.hpp
-	 Classes/Network.h
-     )
+file(GLOB_RECURSE GAME_HEADER Classes/*.hpp Classes/*.h) # 添加asio库
+file(GLOB_RECURSE GAME_SOURCE Classes/*.cpp Classes/*.cc)
+# list(APPEND GAME_SOURCE
+#      Classes/AppDelegate.cpp
+#      Classes/HelloWorldScene.cpp
+# 	 Classes/Network.cpp
+#      )
+# list(APPEND GAME_HEADER
+#      Classes/AppDelegate.h
+#      Classes/HelloWorldScene.h
+# 	 Classes/asio.hpp
+# 	 Classes/Network.h
+#      )
 
 if(ANDROID)
     # change APP_NAME to the share library name for Android, it's value depend on AndroidManifest.xml
@@ -122,6 +125,8 @@ elseif(APPLE)
     list(APPEND GAME_SOURCE ${common_res_files})
 endif()
 
+link_directories(${PROTO_BUFFER_ROOT}/cmake/win32)
+
 # mark app complie info and libs info
 set(all_code_files
     ${GAME_HEADER}
@@ -135,10 +140,12 @@ else()
     target_link_libraries(${APP_NAME} -Wl,--whole-archive cpp_android_spec -Wl,--no-whole-archive)
 endif()
 
-target_link_libraries(${APP_NAME} cocos2d)
+
+target_link_libraries(${APP_NAME} cocos2d debug libprotobufd optimized libprotobuf)
 target_include_directories(${APP_NAME}
         PRIVATE Classes
         PRIVATE ${COCOS2DX_ROOT_PATH}/cocos/audio/include/
+        PRIVATE ${PROTO_BUFFER_ROOT}/src
 )
 
 # mark app resources

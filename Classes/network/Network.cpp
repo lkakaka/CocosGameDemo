@@ -1,8 +1,10 @@
 #include "Network.h"
+#include "cocos2d.h"
+
 
 Network* Network::g_network = new Network();
 
-Network::Network() : m_eventHandler(NULL)
+Network::Network()
 {
 	read_buf.resize(1024);
 }
@@ -74,13 +76,13 @@ void Network::doRead() {
 }
 
 void Network::sendData(std::vector<char> msg) {
-	std::copy(msg.begin(), msg.end(), std::back_inserter(send_buf));
+	std::copy(msg.begin(), msg.end(), std::back_inserter(m_sendBuf));
 	doSend();
 }
 
 void Network::doSend() {
-	if (send_buf.size() == 0) return;
-	asio::const_buffer buf(&send_buf.front(), send_buf.size());
+	if (m_sendBuf.size() == 0) return;
+	asio::const_buffer buf(&m_sendBuf.front(), m_sendBuf.size());
 	m_socket->async_write_some(buf, [this](const asio::error_code err_code, size_t datLen) {
 		if (err_code)
 		{
@@ -90,7 +92,7 @@ void Network::doSend() {
 		}
 		
 		if (datLen > 0) {
-			send_buf.erase(send_buf.begin(), send_buf.begin() + datLen);
+			m_sendBuf.erase(m_sendBuf.begin(), m_sendBuf.begin() + datLen);
 			doSend();
 		}
 	});
@@ -111,13 +113,4 @@ void Network::startNetwork() {
 
 Network* Network::getNetwork() {
 	return Network::g_network;
-}
-
-
-void SocketEventHander::onConnect(network::SIOClient* client) {
-	printf("socket on connect-------\n");
-}
-
-void SocketEventHander::onMessage(SIOClient* client, const std::string& data) {
-	printf("socket on onMessage-------\n");
 }
