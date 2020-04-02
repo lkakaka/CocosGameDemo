@@ -23,6 +23,8 @@
  ****************************************************************************/
 
 #include "HelloWorldScene.h"
+#include "proto/proto.h"
+#include "network/Network.h"
 
 USING_NS_CC;
 
@@ -121,7 +123,12 @@ bool HelloWorld::init()
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
     //Close the cocos2d-x game scene and quit the application
-    Director::getInstance()->end();
+    //Director::getInstance()->end();
+
+    LoginReq loginReq;
+    loginReq.set_account("cocos");
+    loginReq.set_pwd("");
+    Network::getNetwork()->sendMsg(MSG_ID_LOGIN_REQ, loginReq);
 
     /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
 

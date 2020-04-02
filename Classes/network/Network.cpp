@@ -1,8 +1,8 @@
 #include "Network.h"
 #include "cocos2d.h"
 
-
 Network* Network::g_network = new Network();
+
 
 Network::Network()
 {
@@ -20,6 +20,11 @@ void Network::connect() {
 		tcp::endpoint target(asio::ip::make_address("127.0.0.1"), 20000);
 		m_socket->connect(target);
 		doRead();
+
+		/*LoginReq loginReq;
+		loginReq.set_account("cocos");
+		loginReq.set_pwd("");
+		sendMsg(MSG_ID_LOGIN_REQ, loginReq);*/
 	}
 	catch (std::exception e) {
 		CCLOG("connect failed, %s", e.what());
@@ -46,12 +51,17 @@ void Network::doRead() {
 
 void Network::doParse() {
 	int size = m_recvBuf.size();
-	if (size < 8) return;
-	int iLen = m_recvBuf.readInt();
-	if (size < iLen) return;
+	if (size < 4) return;
+	int iPacketLen = m_recvBuf.readInt();
+	if (iPacketLen < 8) {
+		CCLOG("$receive data error, packet len(%d) is too short", iPacketLen);
+		disConnect();
+		return;
+	}
+	if (size < iPacketLen) return;
 	m_recvBuf.readIntEx();
 	int iMsgId = m_recvBuf.readIntEx();
-	int iMsgLen = iLen - 8;
+	int iMsgLen = iPacketLen - 8;
 	MessageMgr::onRecvMsg(iMsgId, m_recvBuf.data(), iMsgLen);
 	m_recvBuf.remove(iMsgLen);
 	doParse();
@@ -59,8 +69,9 @@ void Network::doParse() {
 
 void Network::sendMsg(int msgId, google::protobuf::Message& msg) {
 	MyBuffer buffer;
-	buffer.writeInt(msgId);
 	std::string strMsg = msg.SerializeAsString();
+	buffer.writeInt(strMsg.size() + 8);
+	buffer.writeInt(msgId);
 	buffer.writeString(strMsg.data(), strMsg.size());
 	std::copy(buffer.data(), buffer.data() + buffer.size(), std::back_inserter(m_sendBuf));
 	doSend();
@@ -87,6 +98,10 @@ void Network::doSend() {
 			doSend();
 		}
 	});
+}
+
+void Network::disConnect() {
+	m_socket->shutdown(asio::socket_base::shutdown_type::shutdown_both);
 }
 
 void Network::startNetwork() {

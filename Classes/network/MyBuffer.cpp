@@ -30,3 +30,7 @@ void MyBuffer::writeString(const char* dat, int len) {
 void MyBuffer::append(std::vector<char>& dat) {
 	std::copy(dat.begin(), dat.end(), std::back_inserter(buffer));
 }
+
+void MyBuffer::append(std::vector<char>& dat, int len) {
+	std::copy(dat.begin(), dat.begin() + len, std::back_inserter(buffer));
+}

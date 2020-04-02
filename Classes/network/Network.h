@@ -32,6 +32,8 @@ class Network
 		void doParse();
 		void sendData(std::vector<char> msg);
 		void sendMsg(int msgId, google::protobuf::Message& msg);
+
+		void disConnect();
 };
 
  

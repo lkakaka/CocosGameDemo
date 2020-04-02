@@ -17,5 +17,6 @@ public:
 	void writeInt(int val);
 	void writeString(const char* dat, int len);
 	void append(std::vector<char>& dat);
+	void append(std::vector<char>& dat, int len);
 };
 
