@@ -11,8 +11,7 @@ public:
 	inline char* data() { return buffer.data(); }
 	inline void remove(int len) { buffer.erase(buffer.begin(), buffer.begin() + len); }
 
-	int readInt();
-	int readIntEx();
+	int readInt(bool isRemove);
 	
 	void writeInt(int val);
 	void writeString(const char* dat, int len);

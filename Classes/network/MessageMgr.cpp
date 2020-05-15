@@ -17,7 +17,7 @@ void MessageMgr::dispatchMsg(int msgId, std::shared_ptr<google::protobuf::Messag
 	case MSG_ID_LOGIN_RSP:
 		{
 			LoginRsp* rsp = (LoginRsp*)msg.get();
-			CCLOG("recv login rsp, account=%s", rsp->account().c_str());
+			CCLOG("recv login rsp, account=%d", rsp->err_code());
 			break;
 		}
 	default:

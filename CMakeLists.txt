@@ -146,6 +146,7 @@ target_include_directories(${APP_NAME}
         PRIVATE Classes
         PRIVATE ${COCOS2DX_ROOT_PATH}/cocos/audio/include/
         PRIVATE ${PROTO_BUFFER_ROOT}/src
+        PRIVATE Classes/proto
 )
 
 # mark app resources

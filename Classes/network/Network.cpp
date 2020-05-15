@@ -17,7 +17,9 @@ void Network::run() {
 void Network::connect() {
 	m_socket.reset(new tcp::socket(io_context));
 	try {
-		tcp::endpoint target(asio::ip::make_address("127.0.0.1"), 20000);
+		std::string ip = "127.0.0.1";
+		//std::string ip = "111.229.80.201";
+		tcp::endpoint target(asio::ip::make_address(ip), 20000);
 		m_socket->connect(target);
 		doRead();
 
@@ -52,15 +54,15 @@ void Network::doRead() {
 void Network::doParse() {
 	int size = m_recvBuf.size();
 	if (size < 4) return;
-	int iPacketLen = m_recvBuf.readInt();
+	int iPacketLen = m_recvBuf.readInt(false);
 	if (iPacketLen < 8) {
 		CCLOG("$receive data error, packet len(%d) is too short", iPacketLen);
 		disConnect();
 		return;
 	}
 	if (size < iPacketLen) return;
-	m_recvBuf.readIntEx();
-	int iMsgId = m_recvBuf.readIntEx();
+	m_recvBuf.readInt(true);
+	int iMsgId = m_recvBuf.readInt(true);
 	int iMsgLen = iPacketLen - 8;
 	MessageMgr::onRecvMsg(iMsgId, m_recvBuf.data(), iMsgLen);
 	m_recvBuf.remove(iMsgLen);
