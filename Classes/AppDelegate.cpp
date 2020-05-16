@@ -25,7 +25,7 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
 #include "network/Network.h"
-#include "LoginScene.h"
+#include "login/LoginScene.h"
 
 // #define USE_AUDIO_ENGINE 1
 

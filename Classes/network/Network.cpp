@@ -22,11 +22,6 @@ void Network::connect() {
 		tcp::endpoint target(asio::ip::make_address(ip), 20000);
 		m_socket->connect(target);
 		doRead();
-
-		/*LoginReq loginReq;
-		loginReq.set_account("cocos");
-		loginReq.set_pwd("");
-		sendMsg(MSG_ID_LOGIN_REQ, loginReq);*/
 	}
 	catch (std::exception e) {
 		CCLOG("connect failed, %s", e.what());
@@ -40,14 +35,16 @@ void Network::doRead() {
 		{
 			const std::string err_str = error.message();
 			CCLOG("$close connection, %s", err_str.data());
+			disConnect();
 			return;
 		}
 		if (datLen > 0)
 		{
 			CCLOG("$receive data, len:%d, %s", datLen, buf.data());
-			m_recvBuf.append(read_buf);
+			m_recvBuf.append(read_buf, datLen);
 			doParse();
 		}
+		if (m_socket->is_open()) doRead();
 	});
 }
 

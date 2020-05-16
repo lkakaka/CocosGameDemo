@@ -7,6 +7,8 @@
 
 using namespace asio::ip;
 
+#define SEND_MSG(msg_id, msg) Network::getNetwork()->sendMsg(msg_id, msg)
+
 class Network
 {
 	private:
