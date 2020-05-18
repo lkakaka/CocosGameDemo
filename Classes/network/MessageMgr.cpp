@@ -2,9 +2,11 @@
 #include "cocos2d.h"
 #include "Network.h"
 
-#define _HANDER_MAP std::map<std::string, MsgHandler>
+MessageMgr* MessageMgr::g_msgInstance = new MessageMgr();
 
-std::map<int, _HANDER_MAP*> m_msgHanders;
+MessageMgr* MessageMgr::getInstance() {
+	return MessageMgr::g_msgInstance;
+}
 
 void MessageMgr::onRecvMsg(int msgId, char* data, int len) {
 	std::shared_ptr<google::protobuf::Message> msg = CreateMsgById(msgId);
@@ -13,7 +15,23 @@ void MessageMgr::onRecvMsg(int msgId, char* data, int len) {
 		return;
 	}
 	msg->ParseFromArray(data, len);
-	MessageMgr::dispatchMsg(msgId, msg);
+	std::shared_ptr<_Message> ptr(new _Message(msgId, msg));
+	msg_mutex.lock();
+	msg_buffer.push_back(ptr);
+	msg_mutex.unlock();
+	//MessageMgr::dispatchMsg(msgId, msg);
+}
+
+void MessageMgr::onSchdule(float t)
+{
+	if (msg_buffer.empty()) return;
+	msg_mutex.lock();
+	for (auto iter = msg_buffer.begin(); iter != msg_buffer.end(); iter++) {
+		std::shared_ptr<_Message> ptr = *iter;
+		MessageMgr::dispatchMsg(ptr->msgId, ptr->msg);
+	}
+	msg_buffer.clear();
+	msg_mutex.unlock();
 }
 
 void MessageMgr::dispatchMsg(int msgId, std::shared_ptr<google::protobuf::Message> msg) {

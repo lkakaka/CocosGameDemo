@@ -1,9 +1,10 @@
 #include "RoleListScene.h"
+#include "GameScene.h"
 
 USING_NS_CC;
 
 #define MSG_HANDER_TAG_ROLE_LIST "RoleListScene"
-#define MAX_ROLE_NUM 5
+#define MAX_ROLE_NUM 6
 
 Scene* RoleListScene::createScene()
 {
@@ -39,12 +40,20 @@ bool RoleListScene::init()
     float x = origin.x + visibleSize.width / 2;
     float y = origin.y + visibleSize.height * 2 / 3;
 
+    auto label = Label::create();
+    label->setString("Role List:");
+    label->setPosition(Vec2(x, y));
+    this->addChild(label);
+
+    y -= (label->getContentSize().height + 15);
+
     for (int i = 0; i < MAX_ROLE_NUM; i++) {
         auto roleBtn = ui::Button::create();
         m_roleItems.push_back(roleBtn);
+        /*roleBtn->ignoreContentAdaptWithSize(true);
+        roleBtn->setContentSize(Size(50, 10));*/
         roleBtn->setPosition(Vec2(x, y));
         roleBtn->setColor(Color3B::RED);
-        roleBtn->setVisible(true);
         this->addChild(roleBtn);
         y -= (roleBtn->getContentSize().height + 15);
         roleBtn->addTouchEventListener(std::bind(&RoleListScene::btnEnterGameTouchEventListener, this, i, std::placeholders::_1, std::placeholders::_2));
@@ -52,10 +61,15 @@ bool RoleListScene::init()
 
     //auto enterBtn = ui::Button::create(); // ("normal_image.png", "selected_image.png", "disabled_image.png");
     //enterBtn->setTitleText("ENTERGAME");
-    //enterBtn->addTouchEventListener(CC_CALLBACK_2(RoleListScene::btnEnterGameTouchEventListener, this));
+    //enterBtn->addTouchEventListener(std::bind(&RoleListScene::btnEnterGameTouchEventListener, this, 0, std::placeholders::_1, std::placeholders::_2));
 
     //enterBtn->setPosition(Vec2(x, y));
     //this->addChild(enterBtn);
+
+    /*auto label = Label::create();
+    label->setPosition(Vec2(x, y));
+    label->setString("hello");
+    this->addChild(label);*/
 
     // create menu, it's an autorelease object
    /* auto menu = Menu::create(loginBtn, NULL);
@@ -71,9 +85,11 @@ void RoleListScene::updateUI()
         if (roleList.size() > i) {
             std::string name = roleList[i].role_name();
             m_roleItems[i]->setTitleText(name);
+            m_roleItems[i]->setVisible(true);
         }
         else {
             m_roleItems[i]->setTitleText("");
+            m_roleItems[i]->setVisible(false);
         }
     }
 }
@@ -93,7 +109,7 @@ void RoleListScene::btnEnterGameTouchEventListener(int index, Ref* pSender, ui::
         }
          _RoleInfo roleInfo = roleList[index];
          EnterGame enterGameReq;
-         enterGameReq.set_account("cocos");
+         enterGameReq.set_account(GAME_INSTACNE->masterRole.account);
          enterGameReq.set_role_id(roleInfo.role_id());
          SEND_MSG(MSG_ID_ENTER_GAME, enterGameReq);
         break;
@@ -106,8 +122,15 @@ void RoleListScene::btnEnterGameTouchEventListener(int index, Ref* pSender, ui::
 
 void RoleListScene::onRecvEnterGameRsp(int msgId, PB_MSG msg)
 {
-    LoginRsp* rsp = (LoginRsp*)msg.get();
-    CCLOG("recv login rsp, err_code=%d", rsp->err_code());
+    EnterGameRsp* rsp = (EnterGameRsp*)msg.get();
+    CCLOG("recv enter game rsp, err_code=%d", rsp->err_code());
+
+    if (rsp->err_code() == 0) {
+        GAME_INSTACNE->masterRole.role_id = rsp->role_info().role_id();
+        GAME_INSTACNE->masterRole.role_name = rsp->role_info().role_name();
+        auto scene = GameScene::create();
+        Director::getInstance()->replaceScene(scene);
+    }
 }
 
 

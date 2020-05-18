@@ -26,6 +26,8 @@
 #include "HelloWorldScene.h"
 #include "network/Network.h"
 #include "login/LoginScene.h"
+#include "login/RoleListScene.h"
+#include "Game.h"
 
 // #define USE_AUDIO_ENGINE 1
 
@@ -117,6 +119,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     director->runWithScene(scene);
 
 	Network::getNetwork()->startNetwork();
+
+    director->getScheduler()->schedule(CC_SCHEDULE_SELECTOR(MessageMgr::onSchdule), MessageMgr::getInstance(), 0.1, false);
 
     return true;
 }

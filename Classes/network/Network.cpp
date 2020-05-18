@@ -61,7 +61,7 @@ void Network::doParse() {
 	m_recvBuf.readInt(true);
 	int iMsgId = m_recvBuf.readInt(true);
 	int iMsgLen = iPacketLen - 8;
-	MessageMgr::onRecvMsg(iMsgId, m_recvBuf.data(), iMsgLen);
+	MessageMgr::getInstance()->onRecvMsg(iMsgId, m_recvBuf.data(), iMsgLen);
 	m_recvBuf.remove(iMsgLen);
 	doParse();
 }
