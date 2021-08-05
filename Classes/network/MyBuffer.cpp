@@ -1,5 +1,5 @@
 #include "MyBuffer.h"
-
+#include <iterator>
 
 int MyBuffer::readInt(bool isRemove) {
 	if (buffer.size() < 4) throw std::exception("mybyffer read int error");

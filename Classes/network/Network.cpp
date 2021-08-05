@@ -19,7 +19,7 @@ void Network::connect() {
 	try {
 		std::string ip = "127.0.0.1";
 		//std::string ip = "111.229.80.201";
-		tcp::endpoint target(asio::ip::make_address(ip), 20000);
+		tcp::endpoint target(asio::ip::make_address(ip), 30000);
 		m_socket->connect(target);
 		doRead();
 	}
